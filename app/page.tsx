@@ -7,6 +7,7 @@ import { useControls } from '@/components/controls-provider';
 import { FastForwardIcon, PauseIcon, PlayIcon } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import TimeTracker from '@/components/time-tracker';
 
 const Page = () => {
     const { controls, controlsInterface } = useControls();
@@ -60,7 +61,7 @@ const Page = () => {
             if (e.ctrlKey) {
                 e.preventDefault();
                 console.log(e.deltaY);
-                controlsInterface.setControls(prev => ({...prev, zoom: prev.zoom }));
+                controlsInterface.setControls(prev => ({ ...prev, zoom: Math.max(prev.zoom, 0) }));
             }
         }, { passive: false })
         setEventsHooked(true);
@@ -107,6 +108,7 @@ const Page = () => {
                         paddingLeft: `${(controls.time + (controls.context!.currentTime - controls.startedPlayingAt)) * (controls.zoom / 100) * 20}px`
                     }}>test</p>
                 </div> */}
+                <TimeTracker controls={controls} />
                 <div className="flex flex-col gap-1 w-full h-full p-2">
                     {audioFiles.map((file, i) => (
                         <Waveform audioBlob={file} key={i} />

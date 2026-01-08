@@ -1,7 +1,7 @@
 "use client";
 import React, { useContext, createContext, useState } from 'react'
 
-type ControlsProps = {
+export type ControlsProps = {
     playing: boolean;
     time: number;
     zoom: number;

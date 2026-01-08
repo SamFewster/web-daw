@@ -27,8 +27,7 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
             setLocalGainNode(loclaGainNode);
         }
         const url = URL.createObjectURL(audioBlob);
-        console.log(url);
-        setBlobURL(URL.createObjectURL(audioBlob));
+        setBlobURL(url);
         return () => {
             URL.revokeObjectURL(url);
         }
@@ -61,8 +60,13 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
     }, [muted])
 
     useEffect(() => {
+        console.log((controls.zoom / 100) * 20)
         wavesurfer?.zoom((controls.zoom / 100) * 20);
     }, [controls.zoom])
+
+    useEffect(() => {
+        wavesurfer?.zoom((controls.zoom / 100) * 20);
+    }, [wavesurfer])
 
     return (
         <div className="flex">
@@ -86,7 +90,8 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
                     media={audioRef.current}
                     height={100}
                     barRadius={10}
-                    waveColor="red"
+                    waveColor={getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground')}
+                    progressColor={getComputedStyle(document.documentElement).getPropertyValue('--primary')}
                     onReady={(ws) => {
                         setWavesurfer(ws);
                     }}
