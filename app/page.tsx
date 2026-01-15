@@ -61,7 +61,7 @@ const Page = () => {
             if (e.ctrlKey) {
                 e.preventDefault();
                 console.log(e.deltaY);
-                controlsInterface.setControls(prev => ({ ...prev, zoom: Math.max(prev.zoom, 0) }));
+                controlsInterface.setControls(prev => ({ ...prev, zoom: Math.max(prev.zoom + (e.deltaY / 10), 100) }));
             }
         }, { passive: false })
         setEventsHooked(true);
@@ -103,11 +103,6 @@ const Page = () => {
             }}
         >
             <ScrollArea className='min-w-full overflow-x-visible flex items-center flex-col text-center min-h-full' ref={scrollAreaRef}>
-                {/* <div className='w-full bg-muted ml-[60px] flex justify-left items-center'>
-                    <p style={{
-                        paddingLeft: `${(controls.time + (controls.context!.currentTime - controls.startedPlayingAt)) * (controls.zoom / 100) * 20}px`
-                    }}>test</p>
-                </div> */}
                 <TimeTracker controls={controls} />
                 <div className="flex flex-col gap-1 w-full h-full p-2">
                     {audioFiles.map((file, i) => (

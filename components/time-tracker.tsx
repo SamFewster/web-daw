@@ -48,13 +48,11 @@ const TimeTracker = ({ controls }: { controls: ControlsProps }) => {
 
     return (
         // hardcoded 60px margin is temporary - sort out the layout lmao
-        <div className='w-full ml-[60px] flex justify-left items-center'>
-            <div className="fixed h-full absolute top-0 left-0" style={{
-                marginLeft: `${time * (controls.zoom / 100) * 20}px`
+        <div className='w-full flex justify-left items-center pointer pointer-events-none'>
+            <div className="absolute h-full left-0 top-0" style={{
+                marginLeft: `${(time * (controls.zoom / 100) * 20) + 60}px`
             }}>
-                HELLO
-                <div className="bg-primary w-[2px] h-full">
-
+                <div className="bg-primary w-[2px] h-full z-0">
                 </div>
             </div>
         </div>
