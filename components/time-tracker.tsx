@@ -6,13 +6,14 @@ type TimeInfoProps = {
     offsetTime: number
 }
 
-const TimeTracker = ({ controls }: { controls: ControlsProps }) => {
-    const [timeInfo, setTimeInfo] = useState<TimeInfoProps>({
+const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scrollArea: HTMLDivElement }) => {
+    const [, setTimeInfo] = useState<TimeInfoProps>({
         startTime: 0,
         offsetTime: 0
     });
     const [time, setTime] = useState(0);
     const [intervalRef, setIntervalRef] = useState<NodeJS.Timeout | null>();
+    const [scroll, setScroll] = useState(scrollArea.scrollLeft);
     useEffect(() => {
         setTimeInfo(prev => ({ ...prev, startTime: controls.time }))
         setTime(controls.time);
@@ -46,11 +47,15 @@ const TimeTracker = ({ controls }: { controls: ControlsProps }) => {
         setTimeInfo(prev => ({ ...prev, offsetTime: controls.startedPlayingAt }))
     }, [controls.startedPlayingAt])
 
+    scrollArea.addEventListener("scroll", () => {
+        setScroll(scrollArea.scrollLeft)
+    })
+
     return (
         // hardcoded 60px margin is temporary - sort out the layout lmao
         <div className='w-full flex justify-left items-center pointer pointer-events-none'>
             <div className="absolute h-full left-0 top-0" style={{
-                marginLeft: `${(time * (controls.zoom / 100) * 20) + 60}px`
+                marginLeft: `${((time * (controls.zoom / 100) * 20) + 60) - scroll}px`
             }}>
                 <div className="bg-primary w-[2px] h-full z-0">
                 </div>

@@ -103,7 +103,7 @@ const Page = () => {
             }}
         >
             <ScrollArea className='min-w-full overflow-x-visible flex items-center flex-col text-center min-h-full' ref={scrollAreaRef}>
-                <TimeTracker controls={controls} />
+                {scrollAreaRef.current && <TimeTracker controls={controls} scrollArea={scrollAreaRef.current} />}
                 <div className="flex flex-col gap-1 w-full h-full p-2">
                     {audioFiles.map((file, i) => (
                         <Waveform audioBlob={file} key={i} />
