@@ -14,6 +14,11 @@ const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scroll
     const [time, setTime] = useState(0);
     const [intervalRef, setIntervalRef] = useState<NodeJS.Timeout | null>();
     const [scroll, setScroll] = useState(scrollArea.scrollLeft);
+
+    useEffect(() => {
+        console.log(time)
+    }, [time])
+
     useEffect(() => {
         setTimeInfo(prev => ({ ...prev, startTime: controls.time }))
         setTime(controls.time);
@@ -47,9 +52,11 @@ const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scroll
         setTimeInfo(prev => ({ ...prev, offsetTime: controls.startedPlayingAt }))
     }, [controls.startedPlayingAt])
 
-    scrollArea.addEventListener("scroll", () => {
-        setScroll(scrollArea.scrollLeft)
-    })
+    useEffect(() => {        
+        scrollArea.addEventListener("scroll", () => {
+            scrollArea && setScroll(scrollArea.scrollLeft);
+        })
+    }, [])
 
     return (
         // hardcoded 60px margin is temporary - sort out the layout lmao
