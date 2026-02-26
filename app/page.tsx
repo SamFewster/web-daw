@@ -24,7 +24,7 @@ const Page = () => {
         gainNode.connect(context.destination);
         controlsInterface.setControls(prev => ({ ...prev, context, gainNode }));
         (async () => {
-            const response = await axios.get("/sample4.flac", { responseType: "blob" });
+            const response = await axios.get("/sample2.flac", { responseType: "blob" });
             if (response) setAudioFiles([...Array(1).fill("").map(() => (response.data))]);
         })();
     }, [])
@@ -60,7 +60,6 @@ const Page = () => {
         window.addEventListener("wheel", (e: WheelEvent) => {
             if (e.ctrlKey) {
                 e.preventDefault();
-                console.log(e.deltaY);
                 controlsInterface.setControls(prev => ({ ...prev, zoom: Math.max(prev.zoom + (e.deltaY / 10), 100) }));
             }
         }, { passive: false })

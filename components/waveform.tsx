@@ -70,7 +70,7 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
 
     return (
         <div className="flex">
-            <div className="flex flex-col items-center justify-center p-2">
+            <div className="flex flex-col items-center justify-center p-2 gap-2">
                 <Button size="icon" variant="outline" onClick={() => {
                     setMuted(prev => !prev);
                 }}>
@@ -87,6 +87,8 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
                     setLoading(false);
                 }} />}
                 {!loading && audioRef.current && <WavesurferPlayer
+                    hideScrollbar
+                    cursorWidth={0}
                     media={audioRef.current}
                     height={100}
                     barRadius={10}

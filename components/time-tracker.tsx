@@ -38,7 +38,7 @@ const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scroll
             const interval = setInterval(async () => {
                 const st = await getTimeInfo();
                 setTime(st.startTime + (controls.context!.currentTime - st.offsetTime));
-            }, 10)
+            }, 2)
             setIntervalRef(interval)
         } else {
             if (intervalRef) {
