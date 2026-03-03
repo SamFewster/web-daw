@@ -8,10 +8,11 @@ import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import TimeTracker from '@/components/time-tracker';
 import Track from '@/components/track';
+import { computeAudioBuffer } from '@/lib/utils';
 
 const Page = () => {
     const { controls, controlsInterface } = useControls();
-    
+
     const [tracks, setTracks] = useState<Track[]>([]);
 
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -25,13 +26,17 @@ const Page = () => {
         controlsInterface.setControls(prev => ({ ...prev, context, gainNode }));
         (async () => {
             const response = await axios.get("/sample2.flac", { responseType: "blob" });
-            // if (response) setAudioFiles([...Array(1).fill("").map(() => (response.data))]);
             if (response) {
+                const audioBuffer = await computeAudioBuffer(controls.context!, await response.data.arrayBuffer());
                 setTracks(
-                    [[{
-                        audioBlob: response.data,
-                        startTime: 0
-                    }]]
+                    [{
+                        audio: [{
+                            audioBlob: response.data,
+                            audioBuffer: audioBuffer,
+                            startTime: 0,
+                        }],
+                        effects: []
+                    }]
                 )
             }
         })();
@@ -100,18 +105,7 @@ const Page = () => {
                 }} />
             </div>
         </div>
-        <div
-            className='w-screen h-screen'
-            onDragOver={(e) => { e.preventDefault() }}
-            onDragEnter={(e) => { e.preventDefault() }}
-            onDrop={(e) => {
-                e.preventDefault();
-                if (e.dataTransfer.files) setTracks(prev => [...prev, Array.from(e.dataTransfer.files).map((item) => ({
-                    startTime: 0,
-                    audioBlob: item
-                }))]);
-            }}
-        >
+        <div className='w-screen h-screen'>
             <ScrollArea className='min-w-full overflow-x-visible flex items-center flex-col text-center min-h-full' ref={scrollAreaRef}>
                 {scrollAreaRef.current && <TimeTracker controls={controls} scrollArea={scrollAreaRef.current} />}
                 <div className="flex flex-col gap-1 w-full h-full p-2">
@@ -119,7 +113,7 @@ const Page = () => {
                         <Waveform audioBlob={file} key={i} />
                     ))} */}
                     {tracks.map((track, i) => (
-                        <Track track={track} key={i} />
+                        <Track track={track} index={i} setTracks={setTracks} key={i} />
                     ))}
                 </div>
                 <ScrollBar orientation="horizontal" />

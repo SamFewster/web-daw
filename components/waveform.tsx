@@ -1,23 +1,21 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react'
 import WavesurferPlayer from "@wavesurfer/react";
-import { useControls } from './controls-provider';
+import { ControlsProps, useControls } from './controls-provider';
 import WaveSurfer from 'wavesurfer.js';
 
-const Waveform = ({ audioBlob, node }: { audioBlob: Blob, node: AudioNode }) => {
+const Waveform = ({ trackItem, node }: { trackItem: TrackItem, node: AudioNode }) => {
     const [blobURL, setBlobURL] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const { controls, controlsInterface } = useControls();
     const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
     const [track, setTrack] = useState<AudioBufferSourceNode | null>(null);
-    const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>();
+
+    const isTimeToPlay = () => (controls.time + controls.startedPlayingAt - Math.floor(new Date().getTime() / 1000) );
 
     useEffect(() => {
-        (async () => {
-            setAudioBuffer(await controls.context!.decodeAudioData(await audioBlob.arrayBuffer()))
-        })();
-        const url = URL.createObjectURL(audioBlob);
+        const url = URL.createObjectURL(trackItem.audioBlob);
         setBlobURL(url);
         return () => {
             URL.revokeObjectURL(url);
@@ -25,17 +23,13 @@ const Waveform = ({ audioBlob, node }: { audioBlob: Blob, node: AudioNode }) => 
     }, []);
 
     useEffect(() => {
-        wavesurfer?.setTime(controls.time);
-    }, [controls.time]);
-
-    useEffect(() => {
-        if (controls.playing != wavesurfer?.isPlaying()) wavesurfer?.playPause();
+        if (isTimeToPlay() && controls.playing != wavesurfer?.isPlaying()) wavesurfer?.playPause();
         if (!controls.playing) track?.stop();
         else {
             (async () => {
                 const track = controls.context!.createBufferSource();
                 setTrack(track);
-                track.buffer = audioBuffer!;
+                track.buffer = trackItem.audioBuffer;
                 track.connect(node);
 
                 track.start(0, controls.time);
