@@ -27,7 +27,7 @@ const Page = () => {
         (async () => {
             const response = await axios.get("/sample2.flac", { responseType: "blob" });
             if (response) {
-                const audioBuffer = await computeAudioBuffer(controls.context!, await response.data.arrayBuffer());
+                const audioBuffer = await computeAudioBuffer(context, await response.data.arrayBuffer());
                 setTracks(
                     [{
                         audio: [{
@@ -83,7 +83,7 @@ const Page = () => {
         <div className="w-screen bg-muted flex items-center justify-between p-2 z-[2]">
             <div className="flex flex-col gap-2 items-center jusitfy-center text-center">
                 <p className='text-sm'>Zoom</p>
-                <Slider value={[controls.zoom]} min={1} max={100} className="w-[200px]" onValueChange={(value) => controlsInterface.setControls(prev => ({ ...prev, zoom: value[0] }))} />
+                <Slider value={[controls.zoom]} min={1} max={200} className="w-[200px]" onValueChange={(value) => controlsInterface.setControls(prev => ({ ...prev, zoom: value[0] }))} />
             </div>
             <div className="flex gap-2 justify-center items-center">
                 <Button variant="outline" size="icon" onKeyDown={(e) => e.preventDefault()} onClick={() => controlsInterface.seekTime(-10)}>
@@ -98,7 +98,7 @@ const Page = () => {
             </div>
             <div className="flex flex-col gap-2 items-center jusitfy-center text-center">
                 <p className='text-sm'>Volume</p>
-                <Slider min={-100} max={100} defaultValue={[0]} className="w-[200px]" onValueChange={(value) => {
+                <Slider min={0} max={100} defaultValue={[50]} className="w-[200px]" onValueChange={(value) => {
                     if (controls.gainNode) {
                         controls.gainNode.gain.value = value[0] / 100;
                     }
@@ -116,6 +116,14 @@ const Page = () => {
                         <Track track={track} index={i} setTracks={setTracks} key={i} />
                     ))}
                 </div>
+                <Button onClick={() => {
+                    setTracks(prev => [...prev, {
+                        audio: [],
+                        effects: []
+                    }])
+                }}>
+                    Add Track
+                </Button>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
         </div>

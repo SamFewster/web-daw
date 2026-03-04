@@ -16,10 +16,6 @@ const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scroll
     const [scroll, setScroll] = useState(scrollArea.scrollLeft);
 
     useEffect(() => {
-        console.log(time)
-    }, [time])
-
-    useEffect(() => {
         setTimeInfo(prev => ({ ...prev, startTime: controls.time }))
         setTime(controls.time);
     }, [controls.time])
@@ -52,7 +48,7 @@ const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scroll
         setTimeInfo(prev => ({ ...prev, offsetTime: controls.startedPlayingAt }))
     }, [controls.startedPlayingAt])
 
-    useEffect(() => {        
+    useEffect(() => {
         scrollArea.addEventListener("scroll", () => {
             scrollArea && setScroll(scrollArea.scrollLeft);
         })

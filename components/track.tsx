@@ -21,9 +21,10 @@ const Track = ({ track, index, setTracks }: { track: Track, index: number, setTr
     useEffect(() => {
         if (localGainNode) {
             if (muted) localGainNode.gain.value = 0;
-            else localGainNode.gain.value = controls.volume / 100;
+            else localGainNode.gain.value = 1;
         }
     }, [muted]);
+
     return (
         <div
             className="flex"
