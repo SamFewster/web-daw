@@ -5,7 +5,7 @@ import { Volume1Icon, VolumeOffIcon } from 'lucide-react';
 import { useControls } from './controls-provider';
 import { computeAudioBuffer } from '@/lib/utils';
 
-const Track = ({ track, index, setTracks }: { track: Track, index: number, setTracks: React.Dispatch<React.SetStateAction<Track[]>> }) => {
+const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform }: { track: Track, index: number, setTracks: React.Dispatch<React.SetStateAction<Track[]>>, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, selectedWaveform: SelectedWaveform | undefined }) => {
     const [muted, setMuted] = useState(false);
     const [localGainNode, setLocalGainNode] = useState<GainNode | null>();
     const { controls } = useControls();
@@ -39,7 +39,7 @@ const Track = ({ track, index, setTracks }: { track: Track, index: number, setTr
                         const audioBuffer = await computeAudioBuffer(controls.context!, await file.arrayBuffer());
                         const trackTime = audioBuffer.duration;
                         totalTime += trackTime;
-                        return { audioBlob: file, startTime: totalTime - trackTime, audioBuffer: audioBuffer }
+                        return { audioBlob: file, startTime: totalTime - trackTime, audioBuffer: audioBuffer, timestamp: Date.now() };
                     }));
                     setTracks(prev => [
                         ...prev.slice(0, index),
@@ -49,9 +49,9 @@ const Track = ({ track, index, setTracks }: { track: Track, index: number, setTr
                                 ...prev[index].audio,
                                 ...newData
                             ]
-                        }
+                        },
+                        ...prev.slice(index + 1)
                     ]);
-
                 }
             }}
         >
@@ -63,7 +63,9 @@ const Track = ({ track, index, setTracks }: { track: Track, index: number, setTr
                     {muted ? <VolumeOffIcon /> : <Volume1Icon />}
                 </Button>
             </div>
-            {track.audio.map((item, i) => <Waveform trackItem={item} node={localGainNode!} key={i} />)}
+            <div className='relative h-[116px] w-[6000px]' onPointerDown={(e) => { if (e.target == e.currentTarget) setSelectedWaveform(undefined) }}>
+                {track.audio.map((item, i) => <Waveform trackItem={item} setTrackItem={(item: TrackItem) => setTracks(prev => prev.map((track, i2) => i2 === index ? { ...track, audio: track.audio.map((audio, i3) => i3 === i ? item : audio) } : track))} track={track} node={localGainNode!} setSelectedWaveform={setSelectedWaveform} selectedWaveform={selectedWaveform} selectionData={{ trackIndex: index, waveformIndex: i } as SelectedWaveform} key={item.timestamp} />)}
+            </div>
         </div>
     );
 }

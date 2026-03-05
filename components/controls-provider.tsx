@@ -21,7 +21,7 @@ class ControlsInterface {
         this.setControls = setControls;
     }
     public playPause() {
-        this.setControls(prev => ({ ...prev, playing: !prev.playing, startedPlayingAt: prev.context!.currentTime }));
+        this.setControls(prev => ({ ...prev, playing: !prev.playing, startedPlayingAt: prev.context!.currentTime, time: prev.time + (prev.playing ? prev.context!.currentTime - prev.startedPlayingAt : 0) }));
     }
     public async seekTime(offset: number) {
         const controls = await this.getControls();

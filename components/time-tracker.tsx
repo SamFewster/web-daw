@@ -60,7 +60,7 @@ const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scroll
             <div className="fixed h-full left-0 top-0 " style={{
                 marginLeft: `${((time * (controls.zoom / 100) * 20) + 60) - scroll}px`
             }}>
-                <div className="bg-primary w-[2px] h-full z-0">
+                <div className="bg-primary w-[2px] h-full z-10">
                 </div>
             </div>
         </div>

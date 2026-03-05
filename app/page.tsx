@@ -3,21 +3,27 @@ import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { useControls } from '@/components/controls-provider';
-import { FastForwardIcon, PauseIcon, PlayIcon } from 'lucide-react';
+import { CopyIcon, FastForwardIcon, PauseIcon, PlayIcon, TrashIcon } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import TimeTracker from '@/components/time-tracker';
 import Track from '@/components/track';
-import { computeAudioBuffer } from '@/lib/utils';
+import { computeAudioBuffer, getRandomColour } from '@/lib/utils';
+import { useTheme } from 'next-themes';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu';
 
 const Page = () => {
     const { controls, controlsInterface } = useControls();
 
+    const { resolvedTheme } = useTheme();
+
     const [tracks, setTracks] = useState<Track[]>([]);
+    const [selectedWaveform, setSelectedWaveform] = useState<SelectedWaveform | undefined>();
 
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
     const [eventsHooked, setEventsHooked] = useState<boolean>(false);
+
 
     useEffect(() => {
         const context = new AudioContext();
@@ -25,7 +31,7 @@ const Page = () => {
         gainNode.connect(context.destination);
         controlsInterface.setControls(prev => ({ ...prev, context, gainNode }));
         (async () => {
-            const response = await axios.get("/sample2.flac", { responseType: "blob" });
+            const response = await axios.get("/sample3.flac", { responseType: "blob" });
             if (response) {
                 const audioBuffer = await computeAudioBuffer(context, await response.data.arrayBuffer());
                 setTracks(
@@ -34,8 +40,10 @@ const Page = () => {
                             audioBlob: response.data,
                             audioBuffer: audioBuffer,
                             startTime: 0,
+                            timestamp: Date.now(),
                         }],
-                        effects: []
+                        effects: [],
+                        colour: getRandomColour(resolvedTheme!),
                     }]
                 )
             }
@@ -108,26 +116,70 @@ const Page = () => {
         <div className='w-screen h-screen'>
             <ScrollArea className='min-w-full overflow-x-visible flex items-center flex-col text-center min-h-full' ref={scrollAreaRef}>
                 {scrollAreaRef.current && <TimeTracker controls={controls} scrollArea={scrollAreaRef.current} />}
-                <div className="flex flex-col gap-1 w-full h-full p-2">
-                    {/* {audioFiles.map((file, i) => (
-                        <Waveform audioBlob={file} key={i} />
-                    ))} */}
-                    {tracks.map((track, i) => (
-                        <Track track={track} index={i} setTracks={setTracks} key={i} />
-                    ))}
-                </div>
+                <ContextMenu>
+                    <ContextMenuTrigger className="flex flex-col gap-1 h-full p-2 w-full" onContextMenu={(e) => {
+                        if (!selectedWaveform) {
+                            e.preventDefault()
+                        }
+                    }}>
+                        {tracks.map((track, i) => (
+                            <Track track={track} index={i} setTracks={setTracks} setSelectedWaveform={setSelectedWaveform} selectedWaveform={selectedWaveform} key={i} />
+                        ))}
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                        <ContextMenuItem onClick={() => {
+                            if (!selectedWaveform) return;
+                            let timeToAddAudio = 0;
+                            for (const audio of tracks[selectedWaveform.trackIndex].audio) {
+                                const endTime = audio.startTime + audio.audioBuffer.duration;
+                                if (endTime > timeToAddAudio) timeToAddAudio = endTime;
+                            }
+                            setTracks(prev => [
+                                ...prev.slice(0, selectedWaveform.trackIndex),
+                                {
+                                    ...prev[selectedWaveform.trackIndex],
+                                    audio: [
+                                        ...prev[selectedWaveform.trackIndex].audio,
+                                        {
+                                            ...prev[selectedWaveform.trackIndex].audio[selectedWaveform.waveformIndex],
+                                            startTime: timeToAddAudio
+                                        }
+                                    ]
+                                },
+                                ...prev.slice(selectedWaveform.trackIndex + 1)
+                            ]);
+                        }}>
+                            <CopyIcon className='stroke-primary' />
+                            Duplicate
+                        </ContextMenuItem>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem variant='destructive' onClick={() => {
+                            if (!selectedWaveform) return;
+                            setTracks(prev => [
+                                ...prev.slice(0, selectedWaveform.trackIndex),
+                                {
+                                    ...prev[selectedWaveform.trackIndex],
+                                    audio: [
+                                        ...prev[selectedWaveform.trackIndex].audio.filter((_, i) => i !== selectedWaveform.waveformIndex)
+                                    ]
+                                },
+                                ...prev.slice(selectedWaveform.trackIndex + 1)
+                            ]);
+                        }}>
+                            <TrashIcon />
+                            Delete
+                        </ContextMenuItem>
+                    </ContextMenuContent>
+                </ContextMenu>
                 <Button onClick={() => {
-                    setTracks(prev => [...prev, {
-                        audio: [],
-                        effects: []
-                    }])
+                    setTracks(prev => [...prev, { audio: [], effects: [], colour: getRandomColour(resolvedTheme!) }]);
                 }}>
                     Add Track
                 </Button>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
         </div>
-    </div>
+    </div >
 }
 
 export default Page
