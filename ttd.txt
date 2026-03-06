@@ -1,0 +1,10 @@
+using this to keep track of all the shit I said I would add
+- dyslexia-friendly font
+- help information dialog
+- light/dark mode
+- 
+
+TTD w/ the NEA too:
+- rewrite and update analysis to remove references to sharing, online accounts, etc
+- maybe keep the metronome so you have an unfulfilled requirement
+- ask sir about "further test data" in design like wtf does that mean
