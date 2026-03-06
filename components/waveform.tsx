@@ -72,6 +72,8 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
         else if (audioRef.current) audioRef.current.volume = controls.volume / 100;
     }, [muted])
 
+    const setPlaying = (value: boolean) => {}
+
     return (
         <div className="flex">
             <div className="flex flex-col items-center justify-center p-2">
@@ -99,6 +101,7 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
                     }}
                     onPlay={() => { }} 
                     onPause={(ws) => {
+                        setPlaying(false);
                         setControls(prev => ({ ...prev, time: ws.getCurrentTime() }))
                     }}
                 />}
