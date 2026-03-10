@@ -1,5 +1,8 @@
 "use client";
-import React, { useContext, createContext, useState } from 'react'
+import { computeAudioBuffer, getRandomColour } from '@/lib/utils';
+import axios from 'axios';
+import { useTheme } from 'next-themes';
+import React, { useContext, createContext, useState, useEffect } from 'react'
 
 export type ControlsProps = {
     playing: boolean;
@@ -63,6 +66,14 @@ const ControlsProvider = ({ children }: { children: React.ReactNode }) => {
         gainNode: null as null | GainNode,
         startedPlayingAt: 0
     });
+
+    useEffect(() => {
+        const context = new AudioContext();
+        const gainNode = context.createGain();
+        gainNode.connect(context.destination);
+        setControls(prev => ({ ...prev, context, gainNode }));
+    }, [])
+
     return (
         <ControlsContext.Provider value={{ controls, setControls }}>
             {children}
