@@ -72,41 +72,84 @@ const Waveform = ({ audioBlob }: { audioBlob: Blob }) => {
         else if (audioRef.current) audioRef.current.volume = controls.volume / 100;
     }, [muted])
 
-    const setPlaying = (value: boolean) => {}
+    const setPlaying = (value: boolean) => { }
+    const setTime = (value: number) => { }
 
+    // JSX returned by the component (UI layout).
     return (
+
+        // Main container using Flexbox layout.
         <div className="flex">
+
+            {/* Container for the mute button */}
             <div className="flex flex-col items-center justify-center p-2">
-                <Button size="icon" variant="outline" onClick={() => {
-                    setMuted(prev => !prev);
-                }}>
-                    {muted ? <VolumeOffIcon /> : <Volume1Icon /> }
+
+                <Button
+                    size="icon"
+                    variant="outline"
+
+                    // Toggle the muted state when clicked.
+                    onClick={() => {
+                        setMuted(prev => !prev);
+                    }}
+                >
+
+                    {/* Display different icons depending on mute state */}
+                    {muted ? <VolumeOffIcon /> : <Volume1Icon />}
+
                 </Button>
+
             </div>
             <div>
-                {blobURL && <audio src={blobURL} ref={audioRef} onLoadedData={() => {
-                    setLoading(false);
-                }} />}
-                {!loading && audioRef.current && <WavesurferPlayer
-                    media={audioRef.current}
-                    height={100}
-                    waveColor="red"
-                    onReady={(ws) => {
-                        setWavesurfer(ws);
-                    }}
-                    fillParent={false}
-                    minPxPerSec={(controls.zoom / 100) * 20}
-                    onInteraction={(ws) => {
-                        setControls(prev => ({ ...prev, time: ws.getCurrentTime() }));
-                    }}
-                    onPlay={() => { }} 
-                    onPause={(ws) => {
-                        setPlaying(false);
-                        setControls(prev => ({ ...prev, time: ws.getCurrentTime() }))
-                    }}
-                />}
+                {/* Render audio element only when blobURL exists */}
+                {blobURL &&
+                    <audio
+                        src={blobURL}
+                        // When the audio has finished loading,
+                        ref={audioRef}
+                        // update loading state so the waveform can render.
+                        onLoadedData={() => {
+                            setLoading(false);
+                        }}
+                    />
+                }
+
+                {/* Only render the waveform after the audio is loaded */}
+                {!loading && audioRef.current &&
+
+                    <WavesurferPlayer
+                        // Attach Wavesurfer to an existing audio element.
+                        media={audioRef.current}
+                        // Height of waveform visualisation.
+                        height={100}
+                        // Colour of the waveform.
+                        waveColor="red"
+                        // Called when Wavesurfer instance has finished initialising.
+                        onReady={(ws) => {
+                            setWavesurfer(ws);
+                        }}
+                        // Prevent waveform from filling entire container width.
+                        fillParent={false}
+                        // Triggered when the user clicks or drags on the waveform.
+                        onInteraction={(ws) => {
+                            // Update global playback time based on interaction.
+                            setTime(ws.getCurrentTime());
+                        }}
+                        // Placeholder event handler for play.
+                        onPlay={() => {
+                            // Update playing state.
+                            setPlaying(true);
+                        }}
+                        // Event triggered when playback pauses.
+                        onPause={() => {
+                            // Update playing state.
+                            setPlaying(false);
+                        }}
+                    />
+                }
             </div>
         </div>
+
     )
 }
 
