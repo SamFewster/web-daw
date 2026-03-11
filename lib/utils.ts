@@ -19,3 +19,31 @@ export const getRandomColour = (theme: string) => {
 };
 
 export const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
+
+export const resampleAudioBuffer = (context: AudioContext, sourceBuffer: AudioBuffer, speed: number) => {
+  const numChannels = sourceBuffer.numberOfChannels;
+  const oldLength = sourceBuffer.length;
+  const sampleRate = sourceBuffer.sampleRate;
+
+  const newLength = Math.floor(oldLength / speed);
+  const newBuffer = context.createBuffer(numChannels, newLength, sampleRate);
+
+  for (let ch = 0; ch < numChannels; ch++) {
+    const oldData = sourceBuffer.getChannelData(ch);
+    const newData = newBuffer.getChannelData(ch);
+
+    for (let i = 0; i < newLength; i++) {
+      const oldPos = i * speed;
+      const index0 = Math.floor(oldPos);
+      const index1 = Math.min(index0 + 1, oldLength - 1);
+      const frac = oldPos - index0;
+      const sample =
+        oldData[index0] * (1 - frac) +
+        oldData[index1] * frac;
+
+      newData[i] = sample;
+    }
+  }
+
+  return newBuffer;
+}

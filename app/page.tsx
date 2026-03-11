@@ -3,16 +3,13 @@ import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { useControls } from '@/components/controls-provider';
-import { CopyIcon, FastForwardIcon, PauseIcon, PlayIcon, TrashIcon } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import TimeTracker from '@/components/time-tracker';
-import Track from '@/components/track';
 import { computeAudioBuffer, getRandomColour } from '@/lib/utils';
 import { useTheme } from 'next-themes';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Navbar from '@/components/navbar';
+import WaveformContextMenu from '@/components/context-menu';
 
 const Page = () => {
     const { controls, controlsInterface } = useControls();
@@ -94,62 +91,7 @@ const Page = () => {
                 <ResizablePanel defaultSize={75}>
                     <ScrollArea className='min-w-full overflow-x-visible flex items-center flex-col text-center min-h-full' ref={scrollAreaRef}>
                         {scrollAreaRef.current && <TimeTracker controls={controls} scrollArea={scrollAreaRef.current} />}
-                        <ContextMenu>
-                            <ContextMenuTrigger className="flex flex-col gap-1 h-full p-2 w-full" onContextMenu={(e) => {
-                                if (!selectedWaveform) {
-                                    e.preventDefault()
-                                }
-                            }}>
-                                {tracks.map((track, i) => (
-                                    <Track track={track} index={i} setTracks={setTracks} setSelectedWaveform={setSelectedWaveform} selectedWaveform={selectedWaveform} key={i} />
-                                ))}
-                            </ContextMenuTrigger>
-                            <ContextMenuContent>
-                                <ContextMenuItem onClick={() => {
-                                    if (!selectedWaveform) return;
-                                    let timeToAddAudio = 0;
-                                    for (const audio of tracks[selectedWaveform.trackIndex].audio) {
-                                        const endTime = audio.startTime + audio.audioBuffer.duration;
-                                        if (endTime > timeToAddAudio) timeToAddAudio = endTime;
-                                    }
-                                    setTracks(prev => [
-                                        ...prev.slice(0, selectedWaveform.trackIndex),
-                                        {
-                                            ...prev[selectedWaveform.trackIndex],
-                                            audio: [
-                                                ...prev[selectedWaveform.trackIndex].audio,
-                                                {
-                                                    ...prev[selectedWaveform.trackIndex].audio[selectedWaveform.waveformIndex],
-                                                    startTime: timeToAddAudio,
-                                                    timestamp: Date.now()
-                                                }
-                                            ]
-                                        },
-                                        ...prev.slice(selectedWaveform.trackIndex + 1)
-                                    ]);
-                                }}>
-                                    <CopyIcon className='stroke-primary' />
-                                    Duplicate
-                                </ContextMenuItem>
-                                <ContextMenuSeparator />
-                                <ContextMenuItem variant='destructive' onClick={() => {
-                                    if (!selectedWaveform) return;
-                                    setTracks(prev => [
-                                        ...prev.slice(0, selectedWaveform.trackIndex),
-                                        {
-                                            ...prev[selectedWaveform.trackIndex],
-                                            audio: [
-                                                ...prev[selectedWaveform.trackIndex].audio.filter((_, i) => i !== selectedWaveform.waveformIndex)
-                                            ]
-                                        },
-                                        ...prev.slice(selectedWaveform.trackIndex + 1)
-                                    ]);
-                                }}>
-                                    <TrashIcon />
-                                    Delete
-                                </ContextMenuItem>
-                            </ContextMenuContent>
-                        </ContextMenu>
+                        <WaveformContextMenu selectedWaveform={selectedWaveform} setSelectedWaveform={setSelectedWaveform} tracks={tracks} setTracks={setTracks} />
                         <Button onClick={() => {
                             setTracks(prev => [...prev, { audio: [], effects: [], colour: getRandomColour(resolvedTheme!) }]);
                         }}>
@@ -159,7 +101,7 @@ const Page = () => {
                     </ScrollArea>
                 </ResizablePanel>
                 <ResizableHandle />
-                <ResizablePanel defaultSize={25} maxSize={400} className='z-[100]'>
+                <ResizablePanel minSize={100} defaultSize={25} maxSize={400} className='z-[100]'>
                     Effects
                 </ResizablePanel>
             </ResizablePanelGroup>
