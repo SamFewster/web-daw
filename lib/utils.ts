@@ -47,3 +47,12 @@ export const resampleAudioBuffer = (context: AudioContext, sourceBuffer: AudioBu
 
   return newBuffer;
 }
+
+// export const resolveValueFromSetState = async <T> (setState: React.Dispatch<React.SetStateAction<T>>): Promise<T> => {
+//   return new Promise((resolve) => {
+//     setState(prev => {
+//       resolve(prev);
+//       return prev;
+//     });
+//   })
+// }
