@@ -7,4 +7,6 @@ using this to keep track of all the shit I said I would add
 TTD w/ the NEA too:
 - rewrite and update analysis to remove references to sharing, online accounts, etc
 - maybe keep the metronome so you have an unfulfilled requirement
-- ask sir about "further test data" in design like wtf does that mean
+- fix typo on page 27 screenshot "loclagainnode"
+- add more commments to page 36 screenshots
+- make it sound like my dad REALLY wanted audio speed dilation and then add that to requirements to make me look good

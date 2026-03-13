@@ -10,6 +10,7 @@ import { useTheme } from 'next-themes';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import Navbar from '@/components/navbar';
 import WaveformContextMenu from '@/components/context-menu';
+import EffectsPanel from '@/components/effects-panel';
 
 const Page = () => {
     const { controls, controlsInterface } = useControls();
@@ -27,7 +28,7 @@ const Page = () => {
     useEffect(() => {
         if (controls.context) {
             (async () => {
-                const response = await axios.get("/sample3.flac", { responseType: "blob" });
+                const response = await axios.get("/sample6.flac", { responseType: "blob" });
                 if (response) {
                     const audioBuffer = await computeAudioBuffer(controls.context!, await response.data.arrayBuffer());
                     setTracks(
@@ -39,6 +40,7 @@ const Page = () => {
                                 timestamp: Date.now(),
                             }],
                             effects: [],
+                            outputNode: controls.context!.createGain(),
                             colour: getRandomColour(resolvedTheme!),
                         }]
                     )
@@ -93,7 +95,7 @@ const Page = () => {
                         {scrollAreaRef.current && <TimeTracker controls={controls} scrollArea={scrollAreaRef.current} />}
                         <WaveformContextMenu selectedWaveform={selectedWaveform} setSelectedWaveform={setSelectedWaveform} tracks={tracks} setTracks={setTracks} />
                         <Button onClick={() => {
-                            setTracks(prev => [...prev, { audio: [], effects: [], colour: getRandomColour(resolvedTheme!) }]);
+                            setTracks(prev => [...prev, { audio: [], effects: [], colour: getRandomColour(resolvedTheme!), outputNode: controls.context!.createGain() }]);
                         }}>
                             Add Track
                         </Button>
@@ -102,7 +104,7 @@ const Page = () => {
                 </ResizablePanel>
                 <ResizableHandle />
                 <ResizablePanel minSize={100} defaultSize={25} maxSize={400} className='z-[100]'>
-                    Effects
+                    <EffectsPanel selectedWaveform={selectedWaveform} tracks={tracks} setTracks={setTracks} />
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>

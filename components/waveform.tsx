@@ -6,7 +6,7 @@ import WaveSurfer from 'wavesurfer.js';
 import { EPSILON } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-const Waveform = ({ trackItem, setTrackItem, track, node, setSelectedWaveform, selectionData, selectedWaveform }: { trackItem: TrackItem, setTrackItem: (item: TrackItem) => void, track: Track, node: AudioNode, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, selectedWaveform: SelectedWaveform | undefined, selectionData: SelectedWaveform }) => {
+const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selectionData, selectedWaveform }: { trackItem: TrackItem, setTrackItem: (item: TrackItem) => void, track: Track, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, selectedWaveform: SelectedWaveform | undefined, selectionData: SelectedWaveform }) => {
     const [blobURL, setBlobURL] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -37,7 +37,7 @@ const Waveform = ({ trackItem, setTrackItem, track, node, setSelectedWaveform, s
         const newTrack = controls.context!.createBufferSource();
         sourceNodeRef.current = newTrack;
         newTrack.buffer = trackItem.audioBuffer;
-        newTrack.connect(node);
+        newTrack.connect(track.outputNode);
         return newTrack;
     };
 
@@ -68,7 +68,7 @@ const Waveform = ({ trackItem, setTrackItem, track, node, setSelectedWaveform, s
             wavesurfer?.pause();
             wavesurfer?.setTime(0);
 
-            if (controls.playing && node) {
+            if (controls.playing) {
                 const newTrack = connectSourceNode();
 
                 const currentTime = getCurrentTime();
@@ -95,7 +95,7 @@ const Waveform = ({ trackItem, setTrackItem, track, node, setSelectedWaveform, s
 
     useEffect(() => {
         setupWaveformPlayer();
-    }, [controls.playing, controls.time]);
+    }, [controls.playing, controls.time, controls.startedPlayingAt]);
 
     useEffect(() => {
         wavesurfer?.zoom((controls.zoom / 100) * 20);
@@ -115,7 +115,6 @@ const Waveform = ({ trackItem, setTrackItem, track, node, setSelectedWaveform, s
             sourceNodeRef.current?.disconnect();
         } else if (playingTest == 1) {
             wavesurfer?.setTime(0);
-            sourceNodeRef.current?.disconnect();
         }
     }, [controls.time]);
 

@@ -7,22 +7,17 @@ import { computeAudioBuffer } from '@/lib/utils';
 
 const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform }: { track: Track, index: number, setTracks: React.Dispatch<React.SetStateAction<Track[]>>, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, selectedWaveform: SelectedWaveform | undefined }) => {
     const [muted, setMuted] = useState(false);
-    const [localGainNode, setLocalGainNode] = useState<GainNode | null>();
     const { controls } = useControls();
 
     useEffect(() => {
         if (controls.context) {
-            const localGainNode = controls.context.createGain();
-            localGainNode.connect(controls.gainNode!);
-            setLocalGainNode(localGainNode);
+            track.outputNode.connect(controls.gainNode!);
         }
     }, []);
 
     useEffect(() => {
-        if (localGainNode) {
-            if (muted) localGainNode.gain.value = 0;
-            else localGainNode.gain.value = 1;
-        }
+        if (muted) track.outputNode.gain.value = 0;
+        else track.outputNode.gain.value = 1;
     }, [muted]);
 
     return (
@@ -64,7 +59,7 @@ const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform 
                 </Button>
             </div>
             <div className='relative h-[116px] w-[6000px]' onPointerDown={(e) => { if (e.target == e.currentTarget) setSelectedWaveform(undefined) }}>
-                {track.audio.map((item, i) => <Waveform trackItem={item} setTrackItem={(item: TrackItem) => setTracks(prev => prev.map((track, i2) => i2 === index ? { ...track, audio: track.audio.map((audio, i3) => i3 === i ? item : audio) } : track))} track={track} node={localGainNode!} setSelectedWaveform={setSelectedWaveform} selectedWaveform={selectedWaveform} selectionData={{ trackIndex: index, waveformIndex: i } as SelectedWaveform} key={item.timestamp} />)}
+                {track.audio.map((item, i) => <Waveform trackItem={item} setTrackItem={(item: TrackItem) => setTracks(prev => prev.map((track, i2) => i2 === index ? { ...track, audio: track.audio.map((audio, i3) => i3 === i ? item : audio) } : track))} track={track} setSelectedWaveform={setSelectedWaveform} selectedWaveform={selectedWaveform} selectionData={{ trackIndex: index, waveformIndex: i } as SelectedWaveform} key={item.timestamp} />)}
             </div>
         </div>
     );
