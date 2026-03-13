@@ -2,7 +2,6 @@ using this to keep track of all the shit I said I would add
 - dyslexia-friendly font
 - help information dialog
 - light/dark mode
-- 
 
 TTD w/ the NEA too:
 - rewrite and update analysis to remove references to sharing, online accounts, etc
@@ -10,3 +9,4 @@ TTD w/ the NEA too:
 - fix typo on page 27 screenshot "loclagainnode"
 - add more commments to page 36 screenshots
 - make it sound like my dad REALLY wanted audio speed dilation and then add that to requirements to make me look good
+- add audio node pipeline to the design section

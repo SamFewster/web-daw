@@ -1,7 +1,8 @@
 type Effect = {
     id: string,
     intensity: number,
-    node: AudioNode
+    node: AudioNode,
+    timestamp: number
 }
 
 type EffectDefinition = {

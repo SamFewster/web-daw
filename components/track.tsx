@@ -11,9 +11,14 @@ const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform 
 
     useEffect(() => {
         if (controls.context) {
+            console.log("connected")
             track.outputNode.connect(controls.gainNode!);
         }
     }, []);
+
+    useEffect(() => {
+        
+    }, [track.effects])
 
     useEffect(() => {
         if (muted) track.outputNode.gain.value = 0;

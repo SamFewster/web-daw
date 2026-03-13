@@ -28,7 +28,7 @@ const Page = () => {
     useEffect(() => {
         if (controls.context) {
             (async () => {
-                const response = await axios.get("/sample6.flac", { responseType: "blob" });
+                const response = await axios.get("/sample3.flac", { responseType: "blob" });
                 if (response) {
                     const audioBuffer = await computeAudioBuffer(controls.context!, await response.data.arrayBuffer());
                     setTracks(
