@@ -120,3 +120,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer tailwind-base, primereact, tailwind-utilities;
+
+@import 'primereact/resources/themes/lara-light-blue/theme.css' layer(primereact);
+
+@layer tailwind-utilities {
+  @tailwind utilities;
+}

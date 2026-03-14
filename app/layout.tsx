@@ -3,6 +3,10 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import ControlsProvider from "@/components/controls-provider";
+import { PrimeReactProvider } from "primereact/api";
+import Tailwind from 'primereact/passthrough/tailwind';
+import { KnobPassThroughType } from "primereact/knob";
+import { SVGProps } from "react";
 
 const inter = Inter({
     variable: "--font-geist-sans",
@@ -24,16 +28,28 @@ export default function RootLayout({
             <body
                 className={`${inter.className} antialiased`}
             >
-                <ControlsProvider>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="dark"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                        {children}
-                    </ThemeProvider>
-                </ControlsProvider>
+                <PrimeReactProvider value={{
+                    unstyled: true, pt: {
+                        ...Tailwind,
+                        knob: {
+                            ...Tailwind.knob,
+                            label: "text-white fill-white" as KnobPassThroughType<SVGProps<SVGTextElement>>,
+                            range: 'stroke-current transition duration-100 ease-in stroke-muted fill-none' as KnobPassThroughType<SVGProps<SVGTextElement>>,
+                            value: 'animate-dash-frame stroke-primary fill-none' as KnobPassThroughType<SVGProps<SVGTextElement>>
+                        }
+                    }
+                }}>
+                    <ControlsProvider>
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="dark"
+                            enableSystem
+                            disableTransitionOnChange
+                        >
+                            {children}
+                        </ThemeProvider>
+                    </ControlsProvider>
+                </PrimeReactProvider>
             </body>
         </html>
     );

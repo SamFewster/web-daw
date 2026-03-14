@@ -1,23 +1,74 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Waveform from './waveform'
 import { Button } from './ui/button';
 import { Volume1Icon, VolumeOffIcon } from 'lucide-react';
 import { useControls } from './controls-provider';
 import { computeAudioBuffer } from '@/lib/utils';
+import { effectDefinitions } from '@/lib/effect-definitions';
 
 const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform }: { track: Track, index: number, setTracks: React.Dispatch<React.SetStateAction<Track[]>>, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, selectedWaveform: SelectedWaveform | undefined }) => {
     const [muted, setMuted] = useState(false);
     const { controls } = useControls();
 
-    useEffect(() => {
-        if (controls.context) {
-            console.log("connected")
-            track.outputNode.connect(controls.gainNode!);
+    // create a reference to the effect nodes that have already been applied to the track, with a key of each effect's timestamp
+    const effectNodesRef = useRef<Map<number, AudioNode>>(new Map());
+
+    const connectNodes = () => {
+        // disconnect all nodes
+        track.outputNode.disconnect();
+        for (const [i, node] of effectNodesRef.current.entries()) {
+            node.disconnect();
+            // if node has a bypass property (Tuna effect), and it has been removed from the track, set it to true to prevent additional processing
+            if ("bypass" in node && !effectNodesRef.current.has(i)) {
+                (node as any).bypass = true;
+            }
         }
+
+        // start with the track's output node
+        let prev: AudioNode = track.outputNode;
+        for (const effect of track.effects) {
+            // connect each node to each other in order
+            const node = effectNodesRef.current.get(effect.timestamp);
+            // if the effect's node isn't found, ignore it
+            if (!node) continue;
+            prev.connect(node);
+            prev = node;
+        }
+        // connect the final node to the master gain node
+        prev!.connect(controls.gainNode!);
+    }
+
+    useEffect(() => {
+        // connect the track's nodes when the component mounts
+        connectNodes();
     }, []);
 
     useEffect(() => {
-        
+        for (const effect of track.effects) {
+            // find the effect definition from the id in the constant array
+            const effectDef = effectDefinitions.find(e => e.id === effect.id)!;
+
+            let node = effectNodesRef.current.get(effect.timestamp);
+            if (!node) {
+                // if node doesn't already exist, create a new one using the nodeCallback function
+                node = effectDef.nodeCallback(controls.context!);
+            }
+
+            // call the onIntensityChange function with the intensity and node
+            effectDef.onIntensityChange(effect.intensity, node);
+            // add the node to the map
+            effectNodesRef.current.set(effect.timestamp, node);
+        }
+
+        // reconnect the nodes once the effects have been updated
+        connectNodes();
+
+        const removedEffects = Array.from(effectNodesRef.current.keys()).filter(key => !track.effects.find(e => e.timestamp === key)) as number[];
+        for (const key of removedEffects) {
+            const node = effectNodesRef.current.get(key)!;
+            node.disconnect();
+            effectNodesRef.current.delete(key);
+        }
     }, [track.effects])
 
     useEffect(() => {

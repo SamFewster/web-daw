@@ -1,21 +1,7 @@
-export const effectDefinitions: EffectDefinition[] = [
-    {
-        id: "compressor",
-        name: "Compressor",
-        nodeCallback: (context) => {
-            const compressor = context.createDynamicsCompressor();
-            compressor.threshold.value = -30;  // dB level where compression starts
-            compressor.knee.value = 20;        // smoothness of compression
-            compressor.ratio.value = 100;       // compression ratio
-            compressor.attack.value = 0.003;   // how quickly compression starts
-            compressor.release.value = 0.25;   // how quickly it releases
+// @ts-ignore
+import Tuna from 'tunajs';
 
-            return compressor;
-        },
-        onIntensityChange: (intensity, node) => {
-            (node as DynamicsCompressorNode).ratio.value = intensity;
-        }
-    },
+export const effectDefinitions: EffectDefinition[] = [
     {
         id: "gain",
         name: "Gain",
@@ -29,60 +15,191 @@ export const effectDefinitions: EffectDefinition[] = [
         onIntensityChange: (intensity, node) => {
             // update the gain node's volume
             (node as GainNode).gain.value = intensity;
-        }
+        },
+        defaultIntensity: 0.5,
+        minIntensity: 0,
+        maxIntensity: 2,
+        step: 0.1
     },
     {
-        id: "reverb",
-        name: "Reverb",
+        id: "pan",
+        name: "Stereo Pan",
         nodeCallback: (context) => {
-            const convolver = context.createConvolver();
-            const irBuffer = context.createBuffer(2, context.sampleRate * 3, context.sampleRate);
-            convolver.buffer = irBuffer;
-            convolver.normalize = true;
-            return convolver;
+            const pan = context.createStereoPanner();
+            pan.pan.value = 0;
+            return pan;
         },
         onIntensityChange: (intensity, node) => {
-            (node as AudioWorkletNode).port.postMessage({ intensity })
-        }
+            (node as StereoPannerNode).pan.value = intensity;
+        },
+        defaultIntensity: 0,
+        minIntensity: -1,
+        maxIntensity: 1,
+        step: 0.1
+    },
+    {
+        id: "chorus",
+        name: "Chorus",
+        nodeCallback: (context) => {
+            // create a tuna instance and a chorus node from it
+            const tuna = new Tuna(context);
+            const node = new tuna.Chorus();
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).feedback = intensity;
+        },
+        defaultIntensity: 0.4,
+        minIntensity: 0,
+        maxIntensity: 1,
+        step: 0.01
     },
     {
         id: "delay",
         name: "Delay",
         nodeCallback: (context) => {
-            const delayNode = context.createDelay(1000);
-            return delayNode;
+            const tuna = new Tuna(context);
+            const node = new tuna.Delay();
+            return node;
         },
         onIntensityChange: (intensity, node) => {
-            (node as AudioWorkletNode).port.postMessage({ intensity })
-        }
+            (node as any).feedback = intensity;
+        },
+        defaultIntensity: 0.45,
+        minIntensity: 0,
+        maxIntensity: 1,
+        step: 0.01
     },
     {
-        id: "distortion",
-        name: "Distortion",
+        id: "compressor",
+        name: "Compressor",
         nodeCallback: (context) => {
-            const distortion = context.createWaveShaper();
-
-            function makeDistortionCurve(amount: number) {
-                const samples = 44100;
-                const curve = new Float32Array(samples);
-                const k = amount;
-                const deg = Math.PI / 180;
-
-                for (let i = 0; i < samples; i++) {
-                    const x = (i * 2) / samples - 1;
-                    curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
-                }
-
-                return curve;
-            }
-
-            distortion.curve = makeDistortionCurve(50);
-            distortion.oversample = "4x";
-
-            return distortion;
+            const tuna = new Tuna(context);
+            const node = new tuna.Compressor();
+            return node;
         },
-        onIntensityChange(intensity, node) {
-
+        onIntensityChange: (intensity, node) => {
+            (node as any).ratio = intensity;
         },
-    }
+        defaultIntensity: 4,
+        minIntensity: 1,
+        maxIntensity: 20,
+        step: 1
+    },
+    {
+        id: "lowpass",
+        name: "Low Pass Filter",
+        nodeCallback: (context) => {
+            const tuna = new Tuna(context);
+            const node = new tuna.Filter({
+                type: "lowpass"
+            });
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).frequency = intensity;
+        },
+        defaultIntensity: 800,
+        minIntensity: 20,
+        maxIntensity: 22050,
+        step: 1
+    },
+    {
+        id: "highpass",
+        name: "High Pass Filter",
+        nodeCallback: (context) => {
+            const tuna = new Tuna(context);
+            const node = new tuna.Filter({
+                type: "highpass"
+            });
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).frequency = intensity;
+        },
+        defaultIntensity: 800,
+        minIntensity: 20,
+        maxIntensity: 22050,
+        step: 1
+    },
+    {
+        id: "tremolo",
+        name: "Tremolo",
+        nodeCallback: (context) => {
+            const tuna = new Tuna(context);
+            const node = new tuna.Tremolo();
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).intensity = intensity;
+        },
+        defaultIntensity: 0.3,
+        minIntensity: 0,
+        maxIntensity: 1,
+        step: 0.01
+    },
+    {
+        id: "wahwah",
+        name: "Wah Wah",
+        nodeCallback: (context) => {
+            const tuna = new Tuna(context);
+            const node = new tuna.WahWah();
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).sensitivity = intensity;
+        },
+        defaultIntensity: -0.5,
+        minIntensity: -1,
+        maxIntensity: 1,
+        step: 0.01
+    },
+    {
+        id: "bitcrusher",
+        name: "Bitcrusher",
+        nodeCallback: (context) => {
+            const tuna = new Tuna(context);
+            const node = new tuna.Bitcrusher();
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).normfreq = intensity;
+        },
+        defaultIntensity: 0.1,
+        minIntensity: 0,
+        maxIntensity: 1,
+        step: 0.01
+    },
+    {
+        id: "moog",
+        name: "Moog Filter",
+        nodeCallback: (context) => {
+            const tuna = new Tuna(context);
+            const node = new tuna.MoogFilter();
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).resonance = intensity;
+        },
+        defaultIntensity: 3.5,
+        minIntensity: 0,
+        maxIntensity: 4,
+        step: 0.01
+    },
+    {
+        id: "pingpong",
+        name: "Ping Pong Delay",
+        nodeCallback: (context) => {
+            const tuna = new Tuna(context);
+            const node = new tuna.PingPongDelay();
+            return node;
+        },
+        onIntensityChange: (intensity, node) => {
+            (node as any).resonance = intensity;
+        },
+        defaultIntensity: 0.3,
+        minIntensity: 0,
+        maxIntensity: 1,
+        step: 0.01
+    },
 ]
