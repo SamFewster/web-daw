@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Lexend } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import ControlsProvider from "@/components/controls-provider";
@@ -11,6 +11,11 @@ import { SVGProps } from "react";
 const inter = Inter({
     variable: "--font-geist-sans",
     subsets: ["latin"],
+});
+
+const lexend = Lexend({
+    subsets: ["latin"],
+    variable: "--font-dyslexia",
 });
 
 export const metadata: Metadata = {
@@ -26,14 +31,14 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body
-                className={`${inter.className} antialiased`}
+                className={`${inter.className} ${lexend.variable} antialiased`}
             >
                 <PrimeReactProvider value={{
                     unstyled: true, pt: {
                         ...Tailwind,
                         knob: {
                             ...Tailwind.knob,
-                            label: "text-white fill-white" as KnobPassThroughType<SVGProps<SVGTextElement>>,
+                            label: "text-primary fill-primary" as KnobPassThroughType<SVGProps<SVGTextElement>>,
                             range: 'stroke-current transition duration-100 ease-in stroke-muted fill-none' as KnobPassThroughType<SVGProps<SVGTextElement>>,
                             value: 'animate-dash-frame stroke-primary fill-none' as KnobPassThroughType<SVGProps<SVGTextElement>>
                         }

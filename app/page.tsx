@@ -24,26 +24,45 @@ const Page = () => {
 
     const [eventsHooked, setEventsHooked] = useState<boolean>(false);
 
+    useEffect(() => {
+        const dyselxiaPreference = localStorage.getItem("dyselxia-font");
+        if (dyselxiaPreference && dyselxiaPreference === "true") {
+            document.body.classList.add("dyslexia-friendly");
+        } else {
+            document.body.classList.remove("dyslexia-friendly");
+        }
+    }, []);
 
     useEffect(() => {
         if (controls.context) {
             (async () => {
-                const response = await axios.get("/sample3.flac", { responseType: "blob" });
-                if (response) {
-                    const audioBuffer = await computeAudioBuffer(controls.context!, await response.data.arrayBuffer());
-                    setTracks(
-                        [{
-                            audio: [{
-                                audioBlob: response.data,
-                                audioBuffer: audioBuffer,
-                                startTime: 0,
-                                timestamp: Date.now(),
-                            }],
-                            effects: [],
-                            outputNode: controls.context!.createGain(),
-                            colour: getRandomColour(resolvedTheme!),
-                        }]
-                    )
+                const audioElements = ["drums", "bass", "other"]
+                for (const element of audioElements) {
+                    const response = await axios.get(`/${element}_sample.wav`, { responseType: "blob" });
+                    if (response) {
+                        const audioBuffer = await computeAudioBuffer(controls.context!, await response.data.arrayBuffer());
+
+                        const audioItemsToAdd = Array.from({ length: 4 }).fill(null).map((_, index) => ({
+                            audioBlob: response.data,
+                            audioBuffer: audioBuffer,
+                            startTime: index * audioBuffer.duration,
+                            timestamp: Date.now() + index
+                        }));
+
+                        console.log(audioItemsToAdd)
+
+                        setTracks(prev =>
+                            [
+                                ...prev,
+                                {
+                                    audio: audioItemsToAdd,
+                                    effects: [],
+                                    outputNode: controls.context!.createGain(),
+                                    colour: getRandomColour(resolvedTheme!),
+                                }
+                            ]
+                        )
+                    }
                 }
             })();
         }
@@ -87,7 +106,7 @@ const Page = () => {
     }
 
     return <div className="w-screen h-screen flex flex-col">
-        <Navbar />
+        <Navbar tracks={tracks} />
         <div className='w-screen h-screen'>
             <ResizablePanelGroup orientation="vertical">
                 <ResizablePanel defaultSize={75}>

@@ -3,12 +3,14 @@ import Waveform from './waveform'
 import { Button } from './ui/button';
 import { Volume1Icon, VolumeOffIcon } from 'lucide-react';
 import { useControls } from './controls-provider';
-import { computeAudioBuffer } from '@/lib/utils';
+import { computeAudioBuffer, getRandomColour } from '@/lib/utils';
 import { effectDefinitions } from '@/lib/effect-definitions';
+import { useTheme } from 'next-themes';
 
 const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform }: { track: Track, index: number, setTracks: React.Dispatch<React.SetStateAction<Track[]>>, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, selectedWaveform: SelectedWaveform | undefined }) => {
     const [muted, setMuted] = useState(false);
     const { controls } = useControls();
+    const { resolvedTheme } = useTheme();
 
     // create a reference to the effect nodes that have already been applied to the track, with a key of each effect's timestamp
     const effectNodesRef = useRef<Map<number, AudioNode>>(new Map());
@@ -75,6 +77,19 @@ const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform 
         if (muted) track.outputNode.gain.value = 0;
         else track.outputNode.gain.value = 1;
     }, [muted]);
+
+    useEffect(() => {
+        if (!resolvedTheme) return;
+        setTracks(prev => [
+            ...prev.slice(0, index),
+            {
+                ...prev[index],
+                // generate a new random colour based on the updated theme 
+                colour: getRandomColour(resolvedTheme)
+            },
+            ...prev.slice(index + 1)
+        ]);
+    }, [resolvedTheme])
 
     return (
         <div

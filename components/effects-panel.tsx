@@ -60,7 +60,7 @@ const EffectsPanel = ({ selectedWaveform, tracks, setTracks }: { selectedWavefor
                         {selectedWaveform && tracks[selectedWaveform?.trackIndex]!.effects.map((effect, i) =>
                             <EffectCard effect={effect} selectedWaveform={selectedWaveform} setTracks={setTracks} key={i} />)
                         }
-                        <Card style={{ width: cardWidth }} className='flex flex-col group' aria-disabled={!selectedWaveform}>
+                        <Card style={{ width: cardWidth }} className='flex flex-col group mr-4' aria-disabled={!selectedWaveform}>
                             <CardHeader>
                                 <CardTitle className='group-aria-disabled:text-muted-foreground'>Add Effect</CardTitle>
                             </CardHeader>

@@ -7,7 +7,7 @@ type Effect = {
 type EffectDefinition = {
     id: string,
     name: string,
-    nodeCallback: (context: AudioContext) => AudioNode,
+    nodeCallback: (context: BaseAudioContext) => AudioNode,
     onIntensityChange: (intensity: number, node: AudioNode) => void,
     defaultIntensity: number,
     minIntensity: number,

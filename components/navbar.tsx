@@ -4,8 +4,9 @@ import { FastForwardIcon, PauseIcon, PlayIcon, SettingsIcon } from 'lucide-react
 import { Slider } from './ui/slider'
 import { useControls } from './controls-provider'
 import SettingsDialog from './dialogs/settings-dialog'
+import ExportButton from './export-button'
 
-const Navbar = () => {
+const Navbar = ({ tracks }: { tracks: Track[] }) => {
     const { controls, controlsInterface } = useControls();
     const [settingsOpen, setSettingsOpen] = useState(false);
     return (
@@ -25,7 +26,7 @@ const Navbar = () => {
                     <FastForwardIcon />
                 </Button>
             </div>
-            <div className='flex gap-1'>
+            <div className='flex gap-4'>
                 <div className="flex flex-col gap-2 items-center jusitfy-center text-center">
                     <p className='text-sm'>Volume</p>
                     <Slider min={0} max={100} defaultValue={[50]} className="w-[200px]" onValueChange={(value) => {
@@ -39,6 +40,7 @@ const Navbar = () => {
                 }}>
                     <SettingsIcon />
                 </Button>
+                <ExportButton tracks={tracks} />
                 <SettingsDialog open={settingsOpen} setOpen={setSettingsOpen} />
             </div>
         </div>

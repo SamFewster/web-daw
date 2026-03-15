@@ -60,26 +60,3 @@ export const resampleAudioBuffer = (
 
   return newBuffer; // Return the resampled AudioBuffer
 };
-
-export const makeDistortionCurve = (amount: number) => {
-  const samples = 44100;
-  const curve = new Float32Array(samples);
-  const k = amount;
-  const deg = Math.PI / 180;
-
-  for (let i = 0; i < samples; i++) {
-    const x = (i * 2) / samples - 1;
-    curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
-  }
-
-  return curve;
-}
-
-// export const resolveValueFromSetState = async <T> (setState: React.Dispatch<React.SetStateAction<T>>): Promise<T> => {
-//   return new Promise((resolve) => {
-//     setState(prev => {
-//       resolve(prev);
-//       return prev;
-//     });
-//   })
-// }

@@ -1,7 +1,4 @@
 "use client";
-import { computeAudioBuffer, getRandomColour } from '@/lib/utils';
-import axios from 'axios';
-import { useTheme } from 'next-themes';
 import React, { useContext, createContext, useState, useEffect } from 'react'
 
 export type ControlsProps = {

@@ -12,7 +12,7 @@ function ScrollArea({
   innerClassName,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
-  innerClassName: string
+  innerClassName?: string
 }) {
   return (
     <ScrollAreaPrimitive.Root
