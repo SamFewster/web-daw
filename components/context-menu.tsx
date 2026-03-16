@@ -2,18 +2,15 @@ import React, { useState } from 'react'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { CircleGaugeIcon, CopyIcon, TrashIcon } from 'lucide-react';
 import Track from './track';
-import { useControls } from './controls-provider';
 import SpeedDialog from './dialogs/speed-dialog';
-
 const WaveformContextMenu = ({ selectedWaveform, setSelectedWaveform, tracks, setTracks }: { selectedWaveform: SelectedWaveform | undefined, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, tracks: Track[], setTracks: React.Dispatch<React.SetStateAction<Track[]>> }) => {
-    const { controls } = useControls();
     const [speedDialogOpen, setSpeedDialogOpen] = useState(false);
     return (
         <>
             <ContextMenu>
                 <ContextMenuTrigger className="flex flex-col gap-1 h-full p-2 w-full" onContextMenu={(e) => {
                     if (!selectedWaveform) {
-                        e.preventDefault()
+                        e.preventDefault();
                     }
                 }}>
                     {tracks.map((track, i) => (
@@ -22,7 +19,7 @@ const WaveformContextMenu = ({ selectedWaveform, setSelectedWaveform, tracks, se
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                     <ContextMenuItem onClick={() => {
-                        if (!selectedWaveform) return;
+                        if (!selectedWaveform || !selectedWaveform.waveformIndex) return;
 
                         let timeToAddAudio = 0; // tracks the point to insert the new audio waveform
                         // iterate through the audio waveforms in the selected track
@@ -42,7 +39,7 @@ const WaveformContextMenu = ({ selectedWaveform, setSelectedWaveform, tracks, se
                                 audio: [
                                     ...prev[selectedWaveform.trackIndex].audio,
                                     {
-                                        ...prev[selectedWaveform.trackIndex].audio[selectedWaveform.waveformIndex],
+                                        ...prev[selectedWaveform.trackIndex].audio[selectedWaveform.waveformIndex!],
                                         startTime: timeToAddAudio,
                                         timestamp: Date.now()
                                     }

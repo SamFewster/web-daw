@@ -25,15 +25,10 @@ class ControlsInterface {
     }
     public async seekTime(offset: number) {
         const controls = await this.getControls();
-        let seekTo: number;
-        if (controls.playing) {
-            seekTo = controls.time + (controls.context!.currentTime - controls.startedPlayingAt) + offset;
-        } else {
-            seekTo = controls.time + offset
-        }
+        const seekTo = (controls.playing ? controls.time + (controls.context!.currentTime - controls.startedPlayingAt) : controls.time) + offset;
         if (seekTo > 0) {
             this.setControls(prev => ({ ...prev, time: seekTo, startedPlayingAt: prev.context!.currentTime }));
-        } else this.setControls(prev => ({ ...prev, time: 0 }))
+        } else this.setControls(prev => ({ ...prev, time: 0, startedPlayingAt: prev.context!.currentTime }));
     }
     private async getControls(): Promise<ControlsProps> {
         return new Promise((res) => {

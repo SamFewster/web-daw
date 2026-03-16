@@ -10,13 +10,16 @@ export async function computeAudioBuffer(context: AudioContext, arrayBuffer: Arr
 }
 
 export const getRandomColour = (theme: string) => {
-  const min = theme === 'dark' ? 0 : 100;
-  const max = theme === 'dark' ? 100 : 200;
-  const r = getRandomInt(min, max);
-  const g = getRandomInt(min, max);
-  const b = getRandomInt(min, max);
-  return 'rgb(' + r + ',' + g + ',' + b + ')';
-};
+  const hue = Math.floor(Math.random() * 360); // any color
+  const saturation = 85 + Math.random() * 15;  // very vibrant
+
+  // darker colors for light backgrounds, lighter colors for dark backgrounds
+  const lightness = theme === "light"
+    ? 35 + Math.random() * 10   // darker so it contrasts white
+    : 60 + Math.random() * 10;  // brighter so it contrasts black
+
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
 
 export const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
 

@@ -13,7 +13,7 @@ const Navbar = ({ tracks }: { tracks: Track[] }) => {
         <div className="w-screen bg-muted flex items-center justify-between p-2 z-[2]">
             <div className="flex flex-col gap-2 items-center jusitfy-center text-center">
                 <p className='text-sm'>Zoom</p>
-                <Slider value={[controls.zoom]} min={1} max={200} className="w-[200px]" onValueChange={(value) => controlsInterface.setControls(prev => ({ ...prev, zoom: value[0] }))} />
+                <Slider value={[controls.zoom]} min={10} max={300} className="w-[200px]" onValueChange={(value) => controlsInterface.setControls(prev => ({ ...prev, zoom: value[0] }))} />
             </div>
             <div className="flex gap-2 justify-center items-center">
                 <Button variant="outline" size="icon" onKeyDown={(e) => e.preventDefault()} onClick={() => controlsInterface.seekTime(-10)}>

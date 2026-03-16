@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Waveform from './waveform'
 import { Button } from './ui/button';
-import { Volume1Icon, VolumeOffIcon } from 'lucide-react';
+import { Volume2Icon, VolumeOffIcon, XIcon } from 'lucide-react';
 import { useControls } from './controls-provider';
-import { computeAudioBuffer, getRandomColour } from '@/lib/utils';
+import { cn, computeAudioBuffer, getRandomColour } from '@/lib/utils';
 import { effectDefinitions } from '@/lib/effect-definitions';
 import { useTheme } from 'next-themes';
 
 const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform }: { track: Track, index: number, setTracks: React.Dispatch<React.SetStateAction<Track[]>>, setSelectedWaveform: React.Dispatch<React.SetStateAction<SelectedWaveform | undefined>>, selectedWaveform: SelectedWaveform | undefined }) => {
     const [muted, setMuted] = useState(false);
-    const { controls } = useControls();
+    const { controls, controlsInterface } = useControls();
     const { resolvedTheme } = useTheme();
 
     // create a reference to the effect nodes that have already been applied to the track, with a key of each effect's timestamp
@@ -102,10 +102,13 @@ const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform 
                 if (e.dataTransfer.files) {
                     let totalTime = track.audio.reduce((prev, currentItem) => prev + currentItem.audioBuffer.duration, 0);
                     const newData = await Promise.all(Array.from(e.dataTransfer.files).map(async (file) => {
-                        const audioBuffer = await computeAudioBuffer(controls.context!, await file.arrayBuffer());
-                        const trackTime = audioBuffer.duration;
-                        totalTime += trackTime;
-                        return { audioBlob: file, startTime: totalTime - trackTime, audioBuffer: audioBuffer, timestamp: Date.now() };
+                        // catch any files that aren't audio and ignore them
+                        try {
+                            const audioBuffer = await computeAudioBuffer(controls.context!, await file.arrayBuffer());
+                            const trackTime = audioBuffer.duration;
+                            totalTime += trackTime;
+                            return { audioBlob: file, startTime: totalTime - trackTime, audioBuffer: audioBuffer, timestamp: Date.now() + totalTime };
+                        } catch { }
                     }));
                     setTracks(prev => [
                         ...prev.slice(0, index),
@@ -113,7 +116,8 @@ const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform 
                             ...prev[index],
                             audio: [
                                 ...prev[index].audio,
-                                ...newData
+                                // filter out any undefined items
+                                ...newData.filter(item => typeof item !== "undefined")
                             ]
                         },
                         ...prev.slice(index + 1)
@@ -122,14 +126,33 @@ const Track = ({ track, index, setTracks, setSelectedWaveform, selectedWaveform 
             }}
         >
 
-            <div className="flex flex-col items-center justify-center p-2 gap-2">
+            <div className="flex flex-col items-center justify-center p-2 gap-2 z-[2] mr-2">
                 <Button size="icon" variant="outline" onClick={() => {
                     setMuted(prev => !prev);
                 }}>
-                    {muted ? <VolumeOffIcon /> : <Volume1Icon />}
+                    {muted ? <VolumeOffIcon /> : <Volume2Icon />}
+                </Button>
+                <Button size="icon" variant="outline" onClick={() => {
+                    setTracks(prev => [
+                        ...prev.slice(0, index),
+                        ...prev.slice(index + 1)
+                    ]);
+                    setSelectedWaveform(undefined);
+                }}>
+                    <XIcon />
                 </Button>
             </div>
-            <div className='relative h-[116px] w-[6000px]' onPointerDown={(e) => { if (e.target == e.currentTarget) setSelectedWaveform(undefined) }}>
+            <div className={cn('relative h-[116px] w-[6000px]', selectedWaveform?.trackIndex === index && "bg-muted")} onPointerDown={(e) => {
+                if (e.target == e.currentTarget) {
+                    setSelectedWaveform({
+                        trackIndex: index,
+                        waveformIndex: undefined
+                    })
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const seekToTime = Math.max(0, (e.clientX - rect.left) / ((controls.zoom / 100) * 20));
+                    controlsInterface.setControls(prev => ({ ...prev, time: seekToTime, startedPlayingAt: prev.context!.currentTime }));
+                }
+            }}>
                 {track.audio.map((item, i) => <Waveform trackItem={item} setTrackItem={(item: TrackItem) => setTracks(prev => prev.map((track, i2) => i2 === index ? { ...track, audio: track.audio.map((audio, i3) => i3 === i ? item : audio) } : track))} track={track} setSelectedWaveform={setSelectedWaveform} selectedWaveform={selectedWaveform} selectionData={{ trackIndex: index, waveformIndex: i } as SelectedWaveform} key={item.timestamp} />)}
             </div>
         </div>

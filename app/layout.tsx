@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Lexend } from "next/font/google";
+import { DM_Sans, Lexend } from "next/font/google";
+// @ts-ignore
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import ControlsProvider from "@/components/controls-provider";
@@ -8,10 +9,7 @@ import Tailwind from 'primereact/passthrough/tailwind';
 import { KnobPassThroughType } from "primereact/knob";
 import { SVGProps } from "react";
 
-const inter = Inter({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
-});
+const dmSans = DM_Sans({ subsets: ['latin'] });
 
 const lexend = Lexend({
     subsets: ["latin"],
@@ -31,7 +29,7 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body
-                className={`${inter.className} ${lexend.variable} antialiased`}
+                className={`${dmSans.className} ${lexend.variable} antialiased`}
             >
                 <PrimeReactProvider value={{
                     unstyled: true, pt: {

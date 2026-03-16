@@ -1,4 +1,4 @@
 type SelectedWaveform = {
     trackIndex: number
-    waveformIndex: number
+    waveformIndex?: number
 }

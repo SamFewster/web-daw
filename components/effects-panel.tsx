@@ -52,7 +52,7 @@ const EffectsPanel = ({ selectedWaveform, tracks, setTracks }: { selectedWavefor
     const [selectedEffectId, setSelectedEffectId] = useState<string | undefined>();
 
     return (
-        <ScrollArea className='h-full' innerClassName='[&>div]:min-h-full [&>div]:!block' ref={viewportRef}>
+        <ScrollArea className='h-full' innerClassName='[&>div]:min-h-full [&>div]:!block relative' ref={viewportRef}>
             <div style={{ width }} className='h-2' />
             <div>
                 <div className="absolute inset-0 shrink-0" style={{ left: -scrollX }}>
@@ -94,7 +94,7 @@ const EffectsPanel = ({ selectedWaveform, tracks, setTracks }: { selectedWavefor
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder="Select an effect" />
                                     </SelectTrigger>
-                                    <SelectContent className='z-[100]'>
+                                    <SelectContent>
                                         <SelectGroup>
                                             {effectDefinitions.map((effect, i) => (
                                                 <SelectItem key={i} value={effect.id}>

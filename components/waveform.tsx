@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import WavesurferPlayer from "@wavesurfer/react";
 import { useControls } from './controls-provider';
 import WaveSurfer from 'wavesurfer.js';
-import { EPSILON } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useTheme } from 'next-themes';
 
@@ -69,7 +68,7 @@ const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selecti
             if (controls.playing) {
                 const newTrack = connectSourceNode();
 
-                newTrack.start(0, getCurrentTime() - startTime + EPSILON);
+                newTrack.start(0, getCurrentTime() - startTime);
                 wavesurfer?.play();
             } else {
                 wavesurfer?.pause();
@@ -85,6 +84,7 @@ const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selecti
             if (controls.playing) {
                 const newTrack = connectSourceNode();
 
+                console.log(1)
                 const currentTime = getCurrentTime();
                 newTrack.start((startTime - currentTime) + controls.context!.currentTime, 0);
 
@@ -109,7 +109,11 @@ const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selecti
 
     useEffect(() => {
         setupWaveformPlayer();
-    }, [controls.playing, controls.time, controls.startedPlayingAt, trackItem.startTime]);
+        return () => {
+            disconnectSourceNode();
+            if (queuedPlayTimeoutRef.current) clearTimeout(queuedPlayTimeoutRef.current);
+        }
+    }, [controls.playing, controls.time, controls.startedPlayingAt, trackItem.startTime, wavesurfer]);
 
     useEffect(() => {
         wavesurfer?.zoom((controls.zoom / 100) * 20);
@@ -121,16 +125,16 @@ const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selecti
     }, [wavesurfer]);
 
     const [waveformColors, setWaveformColors] = useState<{ wave: string, progress: string }>({
-        wave: getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground'),
-        progress: getComputedStyle(document.documentElement).getPropertyValue('--primary')
+        wave: getComputedStyle(document.documentElement).getPropertyValue('--waveform-secondary'),
+        progress: getComputedStyle(document.documentElement).getPropertyValue('--background')
     });
 
     useEffect(() => {
         // wait for css variables to change, then update the waveform colors
         setTimeout(() => {
             setWaveformColors({
-                wave: getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground'),
-                progress: getComputedStyle(document.documentElement).getPropertyValue('--primary')
+                wave: getComputedStyle(document.documentElement).getPropertyValue('--waveform-secondary'),
+                progress: getComputedStyle(document.documentElement).getPropertyValue('--background')
             });
         }, 10);
     }, [resolvedTheme]);
@@ -139,7 +143,7 @@ const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selecti
         <div
             style={{ left: left, backgroundColor: track.colour, minWidth: `${trackItem.audioBuffer.duration * ((controls.zoom / 100) * 20)}px` }}
             className={cn('py-2 rounded-md cursor-move absolute top-0 ring-2',
-                selectedWaveform?.trackIndex == selectionData.trackIndex && selectedWaveform?.waveformIndex == selectionData.waveformIndex ? "ring-primary z-2" : "ring-muted-foreground/40",
+                selectedWaveform?.trackIndex == selectionData.trackIndex && selectedWaveform?.waveformIndex == selectionData.waveformIndex ? "ring-primary" : "ring-muted-foreground/30",
                 "transition-opacity duration-300 ease-in-out",
                 loading ? "opacity-0" : "opacity-100",
             )}
@@ -202,7 +206,7 @@ const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selecti
                     setLoading(false);
                 }} />}
                 {!loading && audioRef.current &&
-                    <div className={cn('transition-opacity duration-300 ease-in-out', ready ? "opacity-100" : "opacity-0")}>
+                    <div className={cn('transition-opacity duration-300 ease-in-out z-[-1]', ready ? "opacity-100" : "opacity-0")}>
                         <WavesurferPlayer
                             hideScrollbar
                             cursorWidth={0}
@@ -214,6 +218,7 @@ const Waveform = ({ trackItem, setTrackItem, track, setSelectedWaveform, selecti
                             onReady={(ws) => {
                                 setWavesurfer(ws);
                                 setReady(true);
+                                setupWaveformPlayer();
                             }}
                             fillParent={false}
                             minPxPerSec={20}

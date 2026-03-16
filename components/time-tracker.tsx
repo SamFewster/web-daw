@@ -55,14 +55,11 @@ const TimeTracker = ({ controls, scrollArea }: { controls: ControlsProps, scroll
     }, [])
 
     return (
-        // hardcoded 60px margin is temporary - sort out the layout lmao
-        <div className='max-w-screen flex justify-left items-center pointer pointer-events-none overflow-hidden'>
-            <div className="fixed h-full left-0 top-0 " style={{
-                marginLeft: `${((time * (controls.zoom / 100) * 20) + 60) - scroll}px`
-            }}>
-                <div className="bg-primary w-[2px] h-full z-10">
-                </div>
-            </div>
+        // the hardcoded 68px margin was supposed to be temporary but I ran out of time to restructure the layout so I'm just keeping it 
+        <div className='absolute h-full pointer-events-none top-0' style={{
+            marginLeft: `${((time * (controls.zoom / 100) * 20) + 68) - scroll}px`
+        }}>
+            <div className="bg-primary w-[2px] h-full z-[1000]" />
         </div>
     )
 }

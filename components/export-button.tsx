@@ -1,14 +1,16 @@
 import { effectDefinitions } from '@/lib/effect-definitions';
 import { Button } from './ui/button'
-import React from 'react'
+import React, { useState } from 'react'
 import audioEncoder from 'audio-encoder';
 import { saveAs } from 'file-saver';
-import { DownloadIcon } from 'lucide-react';
+import { DownloadIcon, Loader2Icon } from 'lucide-react';
 
 const sampleRate = 44100;
 
 const ExportButton = ({ tracks }: { tracks: Track[] }) => {
+    const [exporting, setExporting] = useState(false);
     const exportProject = () => async () => {
+        setExporting(true);
         // calculate the total length of the project by finding the end time of the last audio item
         const projectLength = tracks.flatMap(track => track.audio).reduce((acc, item) => (item.startTime + item.audioBuffer.duration) > acc ? item.startTime + item.audioBuffer.duration : acc, 0);
 
@@ -45,12 +47,13 @@ const ExportButton = ({ tracks }: { tracks: Track[] }) => {
 
         // Convert the AudioBuffer to a Blob and download it
         audioEncoder(renderedBuffer, 0, null, async (blob: Blob) => {
+            setExporting(false);
             saveAs(blob, 'project.wav');
         });
     }
     return (
         <Button onClick={exportProject()}>
-            <DownloadIcon />
+            {exporting ? <Loader2Icon className='animate-spin' /> : <DownloadIcon />}
             Export
         </Button>
     )
