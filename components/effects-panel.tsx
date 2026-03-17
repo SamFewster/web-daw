@@ -11,7 +11,7 @@ const cardWidth = 200;
 
 const EffectsPanel = ({ selectedWaveform, tracks, setTracks }: { selectedWaveform: SelectedWaveform | undefined, tracks: Track[], setTracks: React.Dispatch<React.SetStateAction<Track[]>> }) => {
 
-    // since the ScrollArea component embeds a display: table div, we need to do some gross and disgusting things to get the width of the inner div to be respected by the ScrollArea, while maintaing a dynamic height from the resizable panel 
+    // since the ScrollArea component embeds a display: table div, we need to do some gross and disgusting things to get the width of the inner div to be respected by the ScrollArea, while maintaining a dynamic height from the resizable panel 
     // im not proud of this but there was literally no other way, okay? blame radix ui for using outdated css layout standards for their component. janky problems call for janky solutions.
     // https://github.com/radix-ui/primitives/issues/3646
 
@@ -52,19 +52,27 @@ const EffectsPanel = ({ selectedWaveform, tracks, setTracks }: { selectedWavefor
     const [selectedEffectId, setSelectedEffectId] = useState<string | undefined>();
 
     return (
+        // Scrollable container for effect cards. This panel sits under the timeline and shows effects
+        // for the currently selected track (based on `selectedWaveform.trackIndex`).
         <ScrollArea className='h-full' innerClassName='[&>div]:min-h-full [&>div]:!block relative' ref={viewportRef}>
+            {/* Spacer div: forces the ScrollArea's internal layout to respect `width` (workaround explained above). */}
             <div style={{ width }} className='h-2' />
             <div>
+                {/* Absolute wrapper: we shift content left by `scrollX` so the card row stays aligned. */}
                 <div className="absolute inset-0 shrink-0" style={{ left: -scrollX }}>
+                    {/* Horizontal row of cards (effects + add-effect card). */}
                     <div className="inline-flex gap-2 h-full p-2" ref={innerDivRef}>
+                        {/* If a waveform/track is selected, render each effect on that track as a card. */}
                         {selectedWaveform && tracks[selectedWaveform?.trackIndex]!.effects.map((effect, i) =>
                             <EffectCard effect={effect} selectedWaveform={selectedWaveform} setTracks={setTracks} key={i} />)
                         }
+                        {/* "Add Effect" card: always visible, but disabled when nothing is selected. */}
                         <Card style={{ width: cardWidth }} className='flex flex-col group mr-4' aria-disabled={!selectedWaveform}>
                             <CardHeader>
                                 <CardTitle className='group-aria-disabled:text-muted-foreground'>Add Effect</CardTitle>
                             </CardHeader>
                             <CardContent className='flex flex-col gap-2 justify-center items-center flex-1'>
+                                {/* Add button: creates a new Effect entry and appends it to the selected track. */}
                                 <Button className='aspect-square size-20 p-5' variant="outline" disabled={!selectedEffectId || !selectedWaveform} onClick={() => {
                                     if (!selectedEffectId) return;
                                     // get the effect definition
@@ -90,12 +98,14 @@ const EffectsPanel = ({ selectedWaveform, tracks, setTracks }: { selectedWavefor
                                 }}>
                                     <PlusIcon className='size-full' />
                                 </Button>
+                                {/* Dropdown to choose which effect to add next. */}
                                 <Select value={selectedEffectId} onValueChange={setSelectedEffectId} disabled={!selectedWaveform}>
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder="Select an effect" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
+                                            {/* All available effect types come from `effectDefinitions`. */}
                                             {effectDefinitions.map((effect, i) => (
                                                 <SelectItem key={i} value={effect.id}>
                                                     {effect.name}
@@ -136,10 +146,12 @@ export const EffectCard = ({ effect, setTracks, selectedWaveform }: { effect: Ef
                         ...prev.slice(selectedWaveform.trackIndex + 1),
                     ])
                 }}>
+                    {/* Remove this effect from the track. */}
                     <XIcon className='size-5' />
                 </CardAction>
             </CardHeader>
             <CardContent className='flex-1 flex items-center justify-center'>
+                {/* Knob UI controls the effect "intensity" value (stored in state; applied to audio nodes in `Track`). */}
                 <Knob
 
                     value={effect.intensity}
