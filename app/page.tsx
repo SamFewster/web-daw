@@ -117,7 +117,7 @@ const Page = () => {
                             if (e.target == e.currentTarget) {
                                 setSelectedWaveform(undefined);
                                 const rect = e.currentTarget.getBoundingClientRect();
-                                const seekToTime = Math.max(0, (e.clientX - rect.left - 68) / ((controls.zoom / 100) * 20));
+                                const seekToTime = Math.max(0, (scrollAreaRef.current!.scrollLeft + e.clientX - rect.left - 68) / ((controls.zoom / 100) * 20));
                                 controlsInterface.setControls(prev => ({ ...prev, time: seekToTime, startedPlayingAt: prev.context!.currentTime }));
                             }
                         }}
