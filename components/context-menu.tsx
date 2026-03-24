@@ -15,7 +15,7 @@ const WaveformContextMenu = ({ selectedWaveform, setSelectedWaveform, tracks, se
                 {/* The trigger is the entire tracks area. Right-clicking here opens the menu. */}
                 <ContextMenuTrigger className="flex flex-col gap-1 h-full p-2 w-full" onContextMenu={(e) => {
                     // If nothing is selected, we prevent opening the context menu (so actions always have a target).
-                    if (!selectedWaveform || !selectedWaveform.waveformIndex) {
+                    if (!selectedWaveform || typeof selectedWaveform.waveformIndex === 'undefined') {
                         e.preventDefault();
                     }
                 }}>
